@@ -22,10 +22,31 @@ jobs:
         run: ./pull-appstack.sh
         env:
           APPSTACK_ID: ${{ secrets.APPSTACK_ID }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./generated/terraform
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        working-directory: ./generated/terraform
+        continue-on-error: true
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           title: 'Update AppStack changes'
-          body: 'This PR contains the latest changes pulled from AppStack.'
           branch: 'appstack-update'
           base: 'main'
+          body: |
+            This PR updates the AppStack changes in the repository.
+
+            Terraform Plan Output:
+            ```
+            ${{ steps.plan.outputs.stdout }}
+            ```
