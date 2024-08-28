@@ -9,7 +9,6 @@
 .DS_STORE
 builds/
 
-*.tf
 build/
 
 *.zip
