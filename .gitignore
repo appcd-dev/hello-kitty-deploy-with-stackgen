@@ -11,3 +11,5 @@ builds/
 
 *.tf
 build/
+
+*.zip
