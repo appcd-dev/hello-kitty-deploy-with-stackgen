@@ -19,6 +19,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+      - name: tfvars & build lambda package
+        env:
+          TFVARS: ${{ vars.TFVARS }}
+        run: |
+           echo $TFVARS > ./generated/terraform/terraform.tfvars
+           make build
+           cp build/* ./generated/terraform/build/
       - name: Terraform Init
         run: terraform init
         working-directory: ./generated/terraform
