@@ -32,6 +32,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+      - name: Dump tfvars to terraform.tfvars
+        run: |
+          echo $TFVARS > ./generated/terraform/terraform.tfvars
       - name: Terraform Init
         run: terraform init
         working-directory: ./generated/terraform
