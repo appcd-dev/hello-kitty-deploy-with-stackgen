@@ -27,6 +27,7 @@ jobs:
           make build
           mkdir -p ./generated/terraform/build
           cp build/* ./generated/terraform/build/
+          echo 'terraform {\n  backend "s3" {} \n}' > ./generated/terraform/backend.tf
       - name: Terraform Init
         run: |
           terraform init \
