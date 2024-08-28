@@ -1,6 +1,6 @@
 build:
 	rm -rf build
 	mkdir build
-	zip build/app.zip main.py
+	zip build/main.zip main.py
 
 .PHONY: build
