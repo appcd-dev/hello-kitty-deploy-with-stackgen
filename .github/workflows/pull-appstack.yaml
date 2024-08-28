@@ -1,27 +1,27 @@
 name: Pull AppStack Changes
-
 on:
   workflow_dispatch: {}
-
 jobs:
   pull-appstack:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: setup appcd cli
+        run: brew install appcd-dev/homebrew-appcd/appcd
       - name: Configure appcd CLI
         run: |
           mkdir ~/.appcd
           touch ~/.appcd/config.yaml
           echo "url: https://cloud.appcd.io" >> ~/.appcd/config.yaml
           echo "token: ${{ secrets.APPCD_TOKEN }}" >> ~/.appcd/config.yaml
-
       - name: Pull AppStack changes
         run: ./pull-appstack.sh
         env:
           APPSTACK_ID: ${{ secrets.APPSTACK_ID }}
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
