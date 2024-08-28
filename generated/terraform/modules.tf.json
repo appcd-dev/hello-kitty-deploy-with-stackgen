@@ -1,0 +1,82 @@
+{
+  "module": {
+    "appcd_2dbf65a1-3ade-4530-9a57-bc67d6f4bfbb": {
+      "name": "aws_s3-hello-kitty-with-stackgen-policy",
+      "policy": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"AllowKmsAccess\",\n      \"Action\": [\n        \"kms:Decrypt\",\n        \"kms:Encrypt\",\n        \"kms:GenerateDataKey\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": [\n        \"${module.appcd_c5f14030-2682-57e2-b121-e813125256b2.kms_arn}\"\n      ]\n    },\n    {\n      \"Sid\": \"hellokittywithstackgenS3Bucketc5f14030268257e2b121e813125256b2\",\n      \"Action\": [\n        \"s3:GetObject\",\n        \"s3:GetObjectVersion\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": [\n        \"${module.appcd_c5f14030-2682-57e2-b121-e813125256b2.arn}\",\n        \"${module.appcd_c5f14030-2682-57e2-b121-e813125256b2.arn}/*\"\n      ]\n    }\n  ]\n}",
+      "role": "${module.appcd_556e36fe-496a-5f72-9460-247c86932a93.name}",
+      "role_type": "Custom",
+      "source": "./modules/aws_iam_role_policy"
+    },
+    "appcd_342a880c-365a-4e9d-9cc6-caa4b5758ee5": {
+      "name": "log-writer",
+      "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"CloudWatchLogGroupfac04857dd47551584ab7db8952961fd\",\"Action\":[\"logs:CreateLogGroup\"],\"Effect\":\"Allow\",\"Resource\":[\"${module.appcd_fac04857-dd47-5515-84ab-7db8952961fd.arn}\"]},{\"Sid\":\"\",\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Effect\":\"Allow\",\"Resource\":[\"${module.appcd_fac04857-dd47-5515-84ab-7db8952961fd.arn}:*\"]}]}",
+      "role": "${module.appcd_556e36fe-496a-5f72-9460-247c86932a93.name}",
+      "role_type": "Writer",
+      "source": "./modules/aws_iam_role_policy"
+    },
+    "appcd_556e36fe-496a-5f72-9460-247c86932a93": {
+      "assume_role_policy": "{\n\t\t\"Version\": \"2012-10-17\",\n\t\t\"Statement\":{\n\t\t\t\t\"Action\": \"sts:AssumeRole\",\n\t\t\t\t\"Effect\": \"Allow\",\n\t\t\t\t\"Principal\": {\n\t\t\t\t\t\"Service\": \"lambda.amazonaws.com\"\n\t\t\t\t}\n\t\t\t}\n\t}",
+      "description": null,
+      "force_detach_policies": true,
+      "inline_policy": [],
+      "name": "hello-kitty-with-stackgen-role",
+      "source": "./modules/aws_iam_role",
+      "tags": null
+    },
+    "appcd_a7b0dbf8-ab3f-5861-8d42-42ee6425c3e6": {
+      "architecture": "x86_64",
+      "authorization_type": "NONE",
+      "collection_name": null,
+      "cors": [],
+      "create_function_url": true,
+      "description": null,
+      "environment_variables": {
+        "IMAGES_BUCKET": "hello-kitty-assets"
+      },
+      "event_source_arn": null,
+      "event_source_mapping": [],
+      "filename": "main.zip",
+      "function_name": "hello-kitty-with-stackgen-function",
+      "handler": "main.lambda_handler",
+      "log_format": null,
+      "log_group_name": "${module.appcd_fac04857-dd47-5515-84ab-7db8952961fd.name}",
+      "memory_size": 128,
+      "role": "${module.appcd_556e36fe-496a-5f72-9460-247c86932a93.arn}",
+      "runtime": "python3.8",
+      "s3_bucket": null,
+      "s3_key": null,
+      "s3_object_version": null,
+      "source": "./modules/aws_lambda",
+      "system_log_level": null,
+      "tags": {
+        "appstack": "hello-kitty-with-stackgen",
+        "component": "hello-kitty-with-stackgen"
+      },
+      "timeout": 3
+    },
+    "appcd_c5f14030-2682-57e2-b121-e813125256b2": {
+      "block_public_access": true,
+      "bucket_name": "hello-kitty-assets",
+      "bucket_policy": "",
+      "enable_versioning": true,
+      "enable_website_configuration": false,
+      "source": "./modules/aws_s3",
+      "sse_algorithm": "aws:kms",
+      "tags": {
+        "appstack": "hello-kitty-with-stackgen",
+        "component": "hello-kitty-with-stackgen"
+      },
+      "website_error_document": "404.html",
+      "website_index_document": "index.html"
+    },
+    "appcd_fac04857-dd47-5515-84ab-7db8952961fd": {
+      "name": "/aws/lambda/hello-kitty-with-stackgen-function",
+      "retention_in_days": 7,
+      "source": "./modules/aws_cloudwatch_log_group",
+      "tags": {
+        "appstack": "hello-kitty-with-stackgen",
+        "component": "hello-kitty-with-stackgen"
+      }
+    }
+  }
+}
