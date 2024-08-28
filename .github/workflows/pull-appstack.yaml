@@ -34,6 +34,8 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Dump tfvars to terraform.tfvars
         run: |
+          echo $TFVARS
+          echo ${{ TFVARS }}
           echo $TFVARS > ./generated/terraform/terraform.tfvars
           cat ./generated/terraform/terraform.tfvars
       - name: Terraform Init
