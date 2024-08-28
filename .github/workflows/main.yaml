@@ -23,12 +23,16 @@ jobs:
         env:
           TFVARS: ${{ vars.TFVARS }}
         run: |
-           echo $TFVARS > ./generated/terraform/terraform.tfvars
-           make build
-           mkdir -p ./generated/terraform/build
-           cp build/* ./generated/terraform/build/
+          echo $TFVARS > ./generated/terraform/terraform.tfvars
+          make build
+          mkdir -p ./generated/terraform/build
+          cp build/* ./generated/terraform/build/
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=demo/hello-kitty-with-stackgen/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: ./generated/terraform
       - name: Terraform Apply
         run: terraform apply -auto-approve
