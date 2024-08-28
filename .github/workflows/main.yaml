@@ -1,0 +1,33 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./generated/terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./generated/terraform
+
+      - name: Build Lambda Function
+        run: make build
