@@ -35,7 +35,7 @@
       },
       "event_source_arn": null,
       "event_source_mapping": [],
-      "filename": "main.zip",
+      "filename": "build/main.zip",
       "function_name": "hello-kitty-with-stackgen-function",
       "handler": "main.lambda_handler",
       "log_format": null,
