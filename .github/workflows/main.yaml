@@ -25,6 +25,7 @@ jobs:
         run: |
            echo $TFVARS > ./generated/terraform/terraform.tfvars
            make build
+           mkdir -p ./generated/terraform/build
            cp build/* ./generated/terraform/build/
       - name: Terraform Init
         run: terraform init
