@@ -1,10 +1,9 @@
-name: Deploy to Production
+name: Destroy Infrastructure
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
 jobs:
-  deploy:
+  destroy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -37,6 +36,6 @@ jobs:
             -backend-config="key=demo/hello-kitty-with-stackgen/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: ./generated/terraform
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         working-directory: ./generated/terraform
