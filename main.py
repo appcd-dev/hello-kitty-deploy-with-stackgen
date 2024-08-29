@@ -1,71 +1,96 @@
 import os
 import boto3
 import random
+import base64
 from botocore.config import Config
+from botocore.exceptions import ClientError
 
 
 def lambda_handler(event, context):
-    image_number = random.randint(1, 6) # 6 images in the bucket
+    print(event)
+    if event["requestContext"]["http"]["method"] == "GET":
+        try:
+            return get_random_photo_html()
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error: {str(e)}"}
+    elif event["requestContext"]["http"]["method"] == "POST":
+        try:
+            # Check if the event body is base64 encoded
+            if event.get("isBase64Encoded", False):
+                image_data = base64.b64decode(event["body"])
+            else:
+                image_data = event["body"].encode("utf-8")
+            return upload_photo(image_data)
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error: {str(e)}"}
 
+
+def get_random_photo_html():
     try:
-        image_url, attribution_text = get_image_s3(image_number)
+        image_url = get_random_image_s3()
     except Exception as e:
         return {"statusCode": 500, "body": f"Error: {str(e)}"}
+
+    # read the html template from index.html
+    with open("index.html", "r") as file:
+        html_template = file.read()
 
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "text/html"},
         "body": f"""
-            <html>
-            <head>
-                <title>Random Cat Photo</title>
-                <link
-                rel="stylesheet"
-                href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
-                />
-            </head>
-            <body
-                style="
-                height: 100vh;
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                max-width: 100vw;
-                "
-            >
-                <div
-                style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    align-items: center;
-                "
-                >
-                <img style="height: 500px" src="{image_url}" />
-                <p>{attribution_text}</p>
-                </div>
-            </body>
-            </html>
+            {html_template}
         """,
     }
 
 
-def get_image_s3(image_number):
+def upload_photo(photo_file):
     bucket = os.environ["IMAGES_BUCKET"]
-    config = Config(signature_version='s3v4')
-    s3 = boto3.client("s3",config=config)
+    config = Config(signature_version="s3v4")
+    s3 = boto3.client("s3", config=config)
 
-    image_key = f"{image_number}.jpg"
-    attribution_text_key = f"{image_number}.txt"
+    # Check if the file is an image
+    if not photo_file.startswith(b"\xff\xd8") and not photo_file.startswith(b"\x89PNG"):
+        return {"statusCode": 400, "body": "Error: Uploaded file is not a valid image"}
 
-    image_url = s3.generate_presigned_url(
-        "get_object", Params={"Bucket": bucket, "Key": image_key}, ExpiresIn=300
-    )
+    try:
+        # Generate a unique filename
+        filename = f"{random.randint(1000000, 9999999)}.jpg"
+        s3.put_object(Bucket=bucket, Key=filename, Body=photo_file)
+        return {"statusCode": 200, "body": "OK"}
+    except Exception as e:
+        return {"statusCode": 500, "body": f"Error uploading photo: {str(e)}"}
 
-    print(f"Image URL: {image_url}")
 
-    attribution_text = s3.get_object(Bucket=bucket, Key=attribution_text_key)
-    attribution_text = attribution_text["Body"].read().decode("utf-8")
+def get_random_image_s3():
+    bucket = os.environ["IMAGES_BUCKET"]
+    config = Config(signature_version="s3v4")
+    s3 = boto3.client("s3", config=config)
 
-    return image_url, attribution_text
+    try:
+        # List all objects in the bucket
+        response = s3.list_objects_v2(Bucket=bucket)
+
+        # Filter for image files
+        image_keys = [
+            obj["Key"]
+            for obj in response.get("Contents", [])
+            if obj["Key"].lower().endswith((".jpg", ".jpeg", ".png"))
+        ]
+
+        if not image_keys:
+            raise Exception("No images found in the bucket")
+
+        # Select a random image
+        random_image_key = random.choice(image_keys)
+
+        # Generate a presigned URL for the image
+        image_url = s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": random_image_key},
+            ExpiresIn=300,
+        )
+
+        return image_url
+    except Exception as e:
+        raise Exception(f"Error retrieving random image: {str(e)}")
