@@ -6,6 +6,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from urllib.parse import parse_qs
 
+
 def lambda_handler(event, context):
     try:
         if event["requestContext"]["http"]["method"] == "GET":
@@ -14,6 +15,7 @@ def lambda_handler(event, context):
             return handle_upload(event)
     except Exception as e:
         return error_response(f"Unexpected error: {str(e)}")
+
 
 def get_random_photo_html():
     try:
@@ -28,24 +30,30 @@ def get_random_photo_html():
     except Exception as e:
         return error_response(f"Error getting random photo: {str(e)}")
 
+
 def handle_upload(event):
     try:
-        content_type = event['headers'].get('content-type', '')
-        if 'multipart/form-data' in content_type:
-            body = base64.b64decode(event['body']) if event.get('isBase64Encoded', False) else event['body'].encode('utf-8')
-            boundary = content_type.split('=')[1].encode()
+        content_type = event["headers"].get("content-type", "")
+        if "multipart/form-data" in content_type:
+            body = (
+                base64.b64decode(event["body"])
+                if event.get("isBase64Encoded", False)
+                else event["body"].encode("utf-8")
+            )
+            boundary = content_type.split("=")[1].encode()
             parts = body.split(boundary)
             for part in parts:
-                if b'filename' in part:
-                    image_data = part.split(b'\r\n\r\n')[1].rstrip(b'\r\n--')
+                if b"filename" in part:
+                    image_data = part.split(b"\r\n\r\n")[1].rstrip(b"\r\n--")
                     return upload_photo(image_data)
         return error_response("No file was uploaded", 400)
     except Exception as e:
         return error_response(f"Error handling upload: {str(e)}")
 
+
 def upload_photo(photo_file):
     bucket = os.environ["IMAGES_BUCKET"]
-    s3 = get_s3_client()
+    s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
 
     if not is_valid_image(photo_file):
         return error_response("Uploaded file is not a valid image", 400)
@@ -57,9 +65,10 @@ def upload_photo(photo_file):
     except Exception as e:
         return error_response(f"Error uploading photo: {str(e)}")
 
+
 def get_random_image_s3():
     bucket = os.environ["IMAGES_BUCKET"]
-    s3 = get_s3_client()
+    s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
 
     try:
         response = s3.list_objects_v2(Bucket=bucket)
@@ -81,12 +90,10 @@ def get_random_image_s3():
     except Exception as e:
         raise Exception(f"Error retrieving random image: {str(e)}")
 
-def get_s3_client():
-    config = Config(signature_version="s3v4")
-    return boto3.client("s3", config=config)
 
 def is_valid_image(file_data):
     return file_data.startswith(b"\xff\xd8") or file_data.startswith(b"\x89PNG")
+
 
 def error_response(message, status_code=500):
     return {"statusCode": status_code, "body": f"Error: {message}"}
