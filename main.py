@@ -15,7 +15,6 @@ def lambda_handler(event, context):
             return {"statusCode": 500, "body": f"Error: {str(e)}"}
     elif event["requestContext"]["http"]["method"] == "POST":
         try:
-            # Check if the event body is base64 encoded
             if event.get("isBase64Encoded", False):
                 image_data = base64.b64decode(event["body"])
             else:
@@ -48,8 +47,8 @@ def upload_photo(photo_file):
     s3 = boto3.client("s3", config=config)
 
     # Check if the file is an image
-    if not photo_file.startswith(b"\xff\xd8") and not photo_file.startswith(b"\x89PNG"):
-        return {"statusCode": 400, "body": "Error: Uploaded file is not a valid image"}
+    # if not photo_file.startswith(b"\xff\xd8") and not photo_file.startswith(b"\x89PNG"):
+    # return {"statusCode": 400, "body": "Error: Uploaded file is not a valid image"}
 
     try:
         # Generate a unique filename
@@ -77,17 +76,15 @@ def get_random_image_s3():
         ]
 
         if not image_keys:
-            raise Exception("No images found in the bucket")
+            image_url = "https://images.unsplash.com/photo-1605054576990-8d1d1e623fad?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        else:
+            random_image_key = random.choice(image_keys)
 
-        # Select a random image
-        random_image_key = random.choice(image_keys)
-
-        # Generate a presigned URL for the image
-        image_url = s3.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket, "Key": random_image_key},
-            ExpiresIn=300,
-        )
+            image_url = s3.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": bucket, "Key": random_image_key},
+                ExpiresIn=300,
+            )
 
         return image_url
     except Exception as e:
