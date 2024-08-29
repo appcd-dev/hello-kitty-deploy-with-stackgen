@@ -37,7 +37,7 @@ jobs:
             -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: ./generated/terraform
       - name: empty s3 bucket
-        run: aws s3 rm s3://$(cat modules.tf.json | grep IMAGES | cut -d ":" -f 2 | tr -d '"') --recursive
+        run: aws s3 rm s3://$(cat ./generated/terraform/modules.tf.json | grep IMAGES | cut -d ":" -f 2 | tr -d '"') --recursive
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
         working-directory: ./generated/terraform
