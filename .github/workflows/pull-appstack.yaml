@@ -40,6 +40,9 @@ jobs:
           echo $TFVARS > ./generated/terraform/terraform.tfvars
           make build
           cp build/* ./generated/terraform/build/
+          echo 'terraform {
+            backend "s3" {}
+          }' > ./generated/terraform/backend.tf
       - name: Terraform Init
         run: |
           terraform init \
