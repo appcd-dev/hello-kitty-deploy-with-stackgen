@@ -38,9 +38,7 @@ def get_random_photo_html():
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "text/html"},
-        "body": f"""
-            {html_template}
-        """,
+        "body": html_template.replace("{image_url}", image_url),
     }
 
 
