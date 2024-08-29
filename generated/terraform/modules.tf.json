@@ -61,7 +61,7 @@
       "enable_versioning": true,
       "enable_website_configuration": false,
       "source": "./modules/aws_s3",
-      "sse_algorithm": "aws:kms",
+      "sse_algorithm": "AES256",
       "tags": {
         "appstack": "hello-kitty-with-stackgen",
         "component": "hello-kitty-with-stackgen"
