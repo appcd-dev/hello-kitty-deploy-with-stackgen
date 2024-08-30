@@ -7,7 +7,7 @@
       "enable_versioning": true,
       "enable_website_configuration": false,
       "source": "./modules/aws_s3",
-      "sse_algorithm": "AES256",
+      "sse_algorithm": "aws:kms",
       "tags": {
         "appstack": "random-cat-photos-app",
         "component": "hello-kitty-deploy-with-stackgen"
