@@ -1,5 +1,12 @@
 {
   "module": {
+    "appcd_01c40aa8-cdef-4401-be4e-a17b4bd63aa4": {
+      "name": "Reader",
+      "policy": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"632619966469487d91338a522b04ad87\",\n      \"Action\": [\n        \"dynamodb:DescribeTable\",\n        \"dynamodb:ListTables\",\n        \"dynamodb:GetItem\",\n        \"dynamodb:BatchGetItem\",\n        \"dynamodb:Query\",\n        \"dynamodb:Scan\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": [\n        \"${module.appcd_63261996-6469-487d-9133-8a522b04ad87.arn}\",\n        \"${module.appcd_63261996-6469-487d-9133-8a522b04ad87.arn}/*\"\n      ]\n    }\n  ]\n}",
+      "role": "${module.appcd_432ab849-8637-55bd-9c1d-64d73ce3bed7.name}",
+      "role_type": "Reader",
+      "source": "./modules/aws_iam_role_policy"
+    },
     "appcd_30685260-bc27-51e5-8156-12692f6da98f": {
       "block_public_access": true,
       "bucket_name": "random-cat-photos-app-assets",
@@ -54,6 +61,31 @@
         "component": "hello-kitty-deploy-with-stackgen"
       },
       "timeout": 3
+    },
+    "appcd_63261996-6469-487d-9133-8a522b04ad87": {
+      "attribute": [
+        {
+          "name": "id",
+          "type": "S"
+        }
+      ],
+      "billing_mode": "PROVISIONED",
+      "global_secondary_indexes": [],
+      "hash_key": "id",
+      "local_secondary_indexes": [],
+      "point_in_time_recovery_enabled": true,
+      "range_key": "",
+      "read_capacity": 1,
+      "server_side_encryption_enabled": true,
+      "source": "./modules/aws_dynamodb",
+      "stream_enabled": false,
+      "stream_view_type": "NEW_IMAGE",
+      "table_name": "sample-table",
+      "tags": {
+        "appstack": "random-cat-photos-app"
+      },
+      "ttl": [],
+      "write_capacity": 1
     },
     "appcd_6cef0df8-2342-4328-bce5-a79a4da34acd": {
       "name": "aws_s3-hello-kitty-deploy-with-stackgen-policy",
