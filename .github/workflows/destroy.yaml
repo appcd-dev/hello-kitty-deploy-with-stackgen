@@ -36,8 +36,6 @@ jobs:
             -backend-config="key=${{ github.repository }}/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: ./generated/terraform
-      - name: empty s3 bucket
-        run: aws s3 rm s3://hello-kitty-assets --recursive
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
         working-directory: ./generated/terraform
